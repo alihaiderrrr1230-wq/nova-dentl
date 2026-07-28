@@ -11,6 +11,7 @@
     "build": "vite build && electron-builder",
     "build:win": "vite build && electron-builder --win",
     "build:mac": "vite build && electron-builder --mac",
+    "build:web": "vite build"
     "preview": "vite preview"
   },
   "author": "Ali Haider",
