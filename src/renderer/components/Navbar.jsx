@@ -1,96 +1,126 @@
-// Navbar - شريط التنقل العلوي
-// يظهر في كل الصفحات ما عدا Splash
-// زجاجي شفاف تماماً مثل iOS
+// =============================================================
+// Navbar v2 — iOS-style frosted top bar with active indicator
+// -------------------------------------------------------------
+// The Settings button is wired to theme toggle.
+// The Inventory link is REMOVED (no more inventory in v2).
+// =============================================================
+
 import { motion } from 'framer-motion';
-import { Home, User, Activity, Calendar, Package, Archive, Settings, ChevronLeft, Sparkles } from 'lucide-react';
+import {
+  Home,
+  User,
+  Activity,
+  Calendar,
+  Archive,
+  Sparkles,
+  Sun,
+  Moon,
+} from 'lucide-react';
+import { useDataStore } from '@store/useDataStore';
+import { clsx } from '@utils/clsx';
 
 const Navbar = ({ currentPage, onNavigate }) => {
+  const theme = useDataStore((s) => s.theme);
+  const toggleTheme = useDataStore((s) => s.toggleTheme);
+
   const navItems = [
     { id: 'dashboard', label: 'الرئيسية', icon: Home },
+    { id: 'appointments', label: 'الحجوزات', icon: Calendar },
     { id: 'clinic', label: 'العيادة', icon: User },
     { id: 'treatment', label: 'العلاج', icon: Activity },
-    { id: 'appointments', label: 'الحجوزات', icon: Calendar },
-    { id: 'inventory', label: 'المخزن', icon: Package },
     { id: 'archive', label: 'الأرشيف', icon: Archive },
   ];
 
   return (
     <motion.nav
-      initial={{ y: -50, opacity: 0 }}
+      initial={{ y: -30, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="sticky top-0 z-40 px-4 pt-4 pb-2"
     >
       <div className="max-w-7xl mx-auto">
-        <div 
-          className="glass !p-2 flex items-center gap-1"
+        <div
+          className="glass !p-1.5 flex items-center gap-1"
           style={{
-            background: 'rgba(255, 255, 255, 0.6)',
-            backdropFilter: 'blur(30px) saturate(200%)',
-            WebkitBackdropFilter: 'blur(30px) saturate(200%)',
-            boxShadow: '0 4px 30px rgba(0, 50, 80, 0.08)',
+            background: 'var(--glass-bg-strong)',
+            boxShadow: 'var(--glass-shadow-strong)',
           }}
         >
-          {/* اللوغو (يرجع للرئيسية) */}
+          {/* Logo */}
           <motion.button
+            type="button"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onNavigate('dashboard')}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-br from-nova-lime/20 to-nova-lime/5 hover:from-nova-lime/30 hover:to-nova-lime/10 transition-all"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-br from-nova-lime/30 to-nova-lime/10 hover:from-nova-lime/40 hover:to-nova-lime/20 transition-all"
+            aria-label="العودة للرئيسية"
           >
             <Sparkles className="w-5 h-5 text-nova-lime-dark" />
-            <span className="font-bold text-nova-deep hidden sm:inline">NOVA</span>
+            <span className="font-extrabold text-[var(--text-primary)] hidden sm:inline tracking-tight">
+              NOVA
+            </span>
           </motion.button>
 
-          {/* فاصل */}
-          <div className="w-px h-6 bg-nova-deep/10 mx-1" />
+          <div className="w-px h-6 bg-[var(--glass-border)] mx-1" />
 
-          {/* أزرار التنقل */}
-          <div className="flex items-center gap-1 flex-1 overflow-x-auto">
+          {/* Nav items */}
+          <div
+            className="flex items-center gap-1 flex-1 overflow-x-auto"
+            role="tablist"
+          >
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentPage === item.id;
-              
               return (
                 <motion.button
                   key={item.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
                   whileHover={{ scale: 1.05, y: -1 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => onNavigate(item.id)}
-                  className={`relative flex items-center gap-2 px-3 py-2 rounded-xl transition-all whitespace-nowrap ${
+                  className={clsx(
+                    'relative flex items-center gap-2 px-3 py-2 rounded-xl transition-all whitespace-nowrap',
                     isActive
-                      ? 'bg-gradient-to-br from-nova-lime/40 to-nova-lime/20 text-nova-deep shadow-sm'
-                      : 'hover:bg-white/40 text-nova-deep/70'
-                  }`}
+                      ? 'bg-gradient-to-br from-nova-lime/40 to-nova-lime/15 text-[var(--text-primary)]'
+                      : 'text-[var(--text-secondary)] hover:bg-white/30 dark:hover:bg-white/5'
+                  )}
                 >
-                  <Icon className="w-4 h-4" />
-                  <span className="text-sm font-semibold hidden md:inline">{item.label}</span>
-                  
-                  {/* مؤشر نشط */}
                   {isActive && (
                     <motion.div
                       layoutId="activeIndicator"
-                      className="absolute inset-0 rounded-xl border-2 border-nova-lime/50"
-                      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                      className="absolute inset-0 rounded-xl ring-2 ring-nova-lime/60"
+                      transition={{ type: 'spring', stiffness: 350, damping: 28 }}
                     />
                   )}
+                  <Icon className="w-4 h-4 relative z-10" />
+                  <span className="text-sm font-semibold hidden md:inline relative z-10">
+                    {item.label}
+                  </span>
                 </motion.button>
               );
             })}
           </div>
 
-          {/* فاصل */}
-          <div className="w-px h-6 bg-nova-deep/10 mx-1" />
+          <div className="w-px h-6 bg-[var(--glass-border)] mx-1" />
 
-          {/* الإعدادات */}
+          {/* Theme toggle (the activated "Settings" button) */}
           <motion.button
+            type="button"
             whileHover={{ scale: 1.05, rotate: 90 }}
             whileTap={{ scale: 0.95 }}
             transition={{ duration: 0.3 }}
-            className="p-2 rounded-xl hover:bg-white/40 transition"
-            title="الإعدادات"
+            onClick={toggleTheme}
+            className="p-2 rounded-xl hover:bg-white/30 dark:hover:bg-white/5 transition"
+            title={theme === 'dark' ? 'الوضع الفاتح' : 'الوضع الداكن'}
+            aria-label="تبديل المظهر"
           >
-            <Settings className="w-4 h-4 text-nova-deep/70" />
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4 text-amber-400" />
+            ) : (
+              <Moon className="w-4 h-4 text-[var(--text-secondary)]" />
+            )}
           </motion.button>
         </div>
       </div>
