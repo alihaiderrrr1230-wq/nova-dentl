@@ -1,0 +1,12 @@
+// =============================================================
+// NOVA v2 — Tiny class-name combiner
+// -------------------------------------------------------------
+// We avoid pulling a clsx dep for one helper.
+// =============================================================
+export const clsx = (...args) =>
+  args
+    .flat(Infinity)
+    .filter(Boolean)
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
